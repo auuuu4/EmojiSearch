@@ -1,0 +1,65 @@
+JFDML JFormDesigner: "8.2.1.0.348" Java: "17.0.8.1" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "this"
+			"background": new com.jformdesigner.model.SwingColor( "Button.background" )
+			"autoRequestFocus": false
+			"resizable": false
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) {
+				"autoSize": false
+			} ) {
+				name: "MainPanel"
+				"background": &SwingColor0 new com.jformdesigner.model.SwingColor( "Button.background" )
+				add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+					name: "ImageScrollPanel"
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+						"columns": 3
+						"rows": 0
+						"hgap": 5
+						"vgap": 5
+					} ) {
+						name: "ImagePanel"
+						"foreground": #SwingColor0
+						"background": #SwingColor0
+					} )
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"x": 10
+					"y": 65
+					"width": 500
+					"height": 275
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "tipLabel"
+					"text": "输入需要搜索的表情标签后按回车:"
+					"font": new java.awt.Font( "宋体", 1, 12 )
+					"horizontalAlignment": 0
+					"foreground": new java.awt.Color( 255, 255, 255, 255 )
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"x": 10
+					"y": 25
+					"width": 210
+					"height": 25
+				} )
+				add( new FormComponent( "javax.swing.JTextField" ) {
+					name: "searchTextField"
+					"foreground": new java.awt.Color( 255, 255, 255, 255 )
+					"caretColor": new java.awt.Color( 153, 255, 255, 255 )
+					"selectionColor": new java.awt.Color( 255, 255, 255, 255 )
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"x": 220
+					"y": 20
+					"width": 205
+					"height": 30
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Center"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 15 )
+			"size": new java.awt.Dimension( 525, 380 )
+		} )
+	}
+}
