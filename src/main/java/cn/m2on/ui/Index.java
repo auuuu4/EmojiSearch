@@ -41,6 +41,8 @@ public class Index extends JFrame {
 
     public static final Color DEEP_BLACK_COLOR = new Color(24, 24, 24, 255);
     public static final Color POOL_BLACK_COLOR = new Color(94, 89, 89, 255);
+    public static final Color IMG_PANEL_BLACK_COLOR = new Color(183, 183, 183, 255);
+
     private int preX,preY;
     private boolean isDragging;
 
@@ -268,7 +270,7 @@ public class Index extends JFrame {
         MainPanel.setBackground(DEEP_BLACK_COLOR);
         searchTextField.setBackground(DEEP_BLACK_COLOR);
         ImageScrollPanel.setBackground(DEEP_BLACK_COLOR);
-        ImagePanel.setBackground(POOL_BLACK_COLOR);
+        ImagePanel.setBackground(IMG_PANEL_BLACK_COLOR);
 
         // 设置背景透明
         ImageScrollPanel.setOpaque(false);
@@ -305,9 +307,52 @@ public class Index extends JFrame {
         minBt.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                indexWin.setExtendedState(JFrame.ICONIFIED);
+                try {
+                    TrayIcon trayIcon = new TrayIcon(ImageIO.read(new File("F:\\JavaDemo\\EmojiSearch\\src\\main\\resources\\img\\tray.png")));
+                    SystemTray systemTray = SystemTray.getSystemTray();
+
+
+                    trayIcon.setImageAutoSize(true);
+                    trayIcon.setToolTip("点击显示表情包搜索工具");
+                    try {
+
+                        systemTray.add(trayIcon);
+                    } catch (AWTException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+
+                    indexWin.setVisible(false);
+                    trayIcon.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            int clt = e.getClickCount();
+                            if (clt == 1) {
+                                indexWin.setExtendedState(NORMAL);
+                            }
+                            systemTray.remove(trayIcon);
+                            indexWin.setVisible(true);
+                            indexWin.setAlwaysOnTop(true);
+                            indexWin.setAlwaysOnTop(false); // 设置窗口不再保持在顶部
+                        }
+                    });
+
+                }catch (IOException ie){
+                    System.out.println("托盘添加失败");
+                    System.out.println(System.getProperty("user.dir"));
+                    JOptionPane.showMessageDialog(indexWin, "托盘添加失败，已最小化窗口", "提示",JOptionPane.WARNING_MESSAGE);
+                    indexWin.setVisible(true);
+                    indexWin.setExtendedState(JFrame.ICONIFIED);
+
+                }
+
+
+
+
             }
         });
+
+
         //---- minBt ----
 
 
@@ -361,19 +406,19 @@ public class Index extends JFrame {
                     ImagePanel.removeAll();
                     // 开始搜索表情
                     SourceProvider provider = SearchData.getCrawler(SearchConfig.getCurrentSourceIndex());
-                    provider.provideSource(searchContent);
-//                    AlapiProvider alapiProvider = new AlapiProvider();
-//                    alapiProvider.provideSource(searchContent);
-                    //处理搜索到的表情
+                    boolean rst = provider.provideSource(searchContent);
+                    if(rst){
+//                        JOptionPane.showMessageDialog(indexWin, "搜索完成", "提示",JOptionPane.INFORMATION_MESSAGE);
+                    }else{
+                        JOptionPane.showMessageDialog(indexWin, "该表情源搜索出错，请更换其他源", "错误",JOptionPane.ERROR_MESSAGE);
+                    }
                     ImageThreadPoolExecutor.consume();
                 }));
             }
         });
     }
 
-    private void searchTextFieldInputMethodTextChanged(InputMethodEvent e) {
-        // TODO add your code here
-    }
+
 
 
 
@@ -406,7 +451,7 @@ public class Index extends JFrame {
             MainPanel.setBackground(UIManager.getColor("Button.background"));
             MainPanel.setLayout(null);
 
-            //======== ImageScrollPanel ========
+            //======== ImagePanel ========
             {
 
                 //======== ImagePanel ========

@@ -18,13 +18,21 @@ import java.util.Map;
  */
 public class AlapiProvider implements SourceProvider {
     @Override
-    public void provideSource(String keyWordStr) {
-        CrawlerURLSource source = SearchData.getCrawlerSource(3);
-        Map<String ,Object> params = source.getParams();
-        params.put(source.getKeyWord(),keyWordStr);
-        JSONObject jsonResult = JSONObject.parseObject(HttpRequestUtil.doGetWithParams(source.getUrl(),source.getParams()));
-        List<String> imagesUrlList = JSON.parseArray(jsonResult.getString("data"),String.class);
-        SearchData.updateImageURL(imagesUrlList);
+    public boolean provideSource(String keyWordStr) {
+        try{
+            CrawlerURLSource source = SearchData.getCrawlerSource(3);
+            Map<String ,Object> params = source.getParams();
+            params.put(source.getKeyWord(),keyWordStr);
+            JSONObject jsonResult = JSONObject.parseObject(HttpRequestUtil.doGetWithParams(source.getUrl(),source.getParams()));
+            List<String> imagesUrlList = JSON.parseArray(jsonResult.getString("data"),String.class);
+            SearchData.updateImageURL(imagesUrlList);
+            return true;
+        }catch (RuntimeException e){
+            e.printStackTrace();
+            return false;
+        }
+
+
     }
 
 

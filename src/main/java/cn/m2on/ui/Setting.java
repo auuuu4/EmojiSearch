@@ -97,7 +97,10 @@ public class Setting extends JFrame {
                 // 添加一个对文件夹处理的线程
                 if (result == JFileChooser.APPROVE_OPTION) {
                     ImageThreadPoolExecutor.execute(new Thread(()->{
+                        SearchData.clearUrlQueue();
+                        ImageThreadPoolExecutor.reset();
                         ((Index) parentFrame).readLocalImg(fileChooser.getSelectedFile().getAbsolutePath());
+                        JOptionPane.showMessageDialog(parentFrame, "读取本地文件完成", "提示",JOptionPane.INFORMATION_MESSAGE);
                     }));
                     parentFrame.setEnabled(true);
                     settingWin.dispose();
@@ -130,6 +133,7 @@ public class Setting extends JFrame {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     int selectedIndex = crawerSourceComBox.getSelectedIndex();
                     SearchConfig.setCurrentSourceIndex(selectedIndex);
+                    JOptionPane.showMessageDialog(parentFrame, "你更改了爬虫源为："+SearchData.getCrawlerSource(SearchConfig.getCurrentSourceIndex()).getSourceName(), "提示",JOptionPane.INFORMATION_MESSAGE);
                     System.out.println("更改爬虫源下标为"+SearchConfig.getCurrentSourceIndex());
                 }
             }
@@ -247,7 +251,7 @@ public class Setting extends JFrame {
                     textArea.setText("\u4f5c\u8005\uff1aauuuu4\n\n\u6b22\u8fce\u53cd\u9988+Q3414608521\n\n\u8be5\u9879\u76ee\u5df2 \u5728GitHub \u5f00\u6e90 \uff1a\n\nhttps://github.com/auuuu4/EmojiSearch\n\nVersion 1.0.0-Bate");
                     textArea.setMargin(new Insets(25, 25, 0, 0));
                     textArea.setForeground(new Color(0x00cccc));
-                    textArea.setFont(new Font("\u5b8b\u4f53", Font.BOLD, 14));
+                    textArea.setFont(new Font("\u5b8b\u4f53", Font.BOLD, 13));
                     AboutPanel.add(textArea);
                     textArea.setBounds(10, 15, 375, 175);
                 }

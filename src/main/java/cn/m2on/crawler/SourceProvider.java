@@ -8,6 +8,6 @@ package cn.m2on.crawler;
  *
  */
 public interface SourceProvider {
-    abstract void provideSource(String keyWord);
+    abstract boolean provideSource(String keyWord);
 
 }

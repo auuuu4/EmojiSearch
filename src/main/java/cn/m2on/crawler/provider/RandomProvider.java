@@ -19,15 +19,22 @@ import java.util.Map;
  * @Description: 随机源的爬虫
  */
 public class RandomProvider implements SourceProvider {
-    public static final ArrayList<ImageSource> imageSources = new ArrayList<>();
+
     @Override
-    public void provideSource(String keyWord) {
-        CrawlerURLSource source = SearchData.getCrawlerSource(1);
-        Map<String ,Object> params = source.getParams();
-        JSONObject jsonResult = JSONObject.parseObject(HttpRequestUtil.doGetWithParams(source.getUrl(),source.getParams()));
-        System.out.println(jsonResult);
-        List<String> imagesUrlList = JSON.parseArray(jsonResult.getString("pic"),String.class);
-        SearchData.updateImageURL(imagesUrlList);
+    public boolean provideSource(String keyWord) {
+        try {
+            CrawlerURLSource source = SearchData.getCrawlerSource(1);
+            Map<String ,Object> params = source.getParams();
+            JSONObject jsonResult = JSONObject.parseObject(HttpRequestUtil.doGetWithParams(source.getUrl(),source.getParams()));
+            System.out.println(jsonResult);
+            List<String> imagesUrlList = JSON.parseArray(jsonResult.getString("pic"),String.class);
+            SearchData.updateImageURL(imagesUrlList);
+            return true;
+        }catch (RuntimeException e){
+            e.printStackTrace();
+            return false;
+        }
+
 
     }
 

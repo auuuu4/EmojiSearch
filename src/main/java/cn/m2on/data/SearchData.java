@@ -59,7 +59,7 @@ public class SearchData {
     static {
         // DouTuApi
         HashMap<String,Object> params = new HashMap<>();
-        crawlerSourcesArray.add(new CrawlerURLSource("斗图api","https://doutu.lccyy.com/doutu/items",Method.GET,"keyword",params));
+        crawlerSourcesArray.add(new CrawlerURLSource("斗图api(默认)","https://doutu.lccyy.com/doutu/items",Method.GET,"keyword",params));
 
         // RandomApi
         params.clear();

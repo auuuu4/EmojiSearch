@@ -1,0 +1,104 @@
+JFDML JFormDesigner: "8.2.1.0.348" Java: "17.0.8.1" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "this"
+			"preferredSize": new java.awt.Dimension( 400, 290 )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+				name: "MainPanel"
+				"minimumSize": new java.awt.Dimension( 400, 290 )
+				add( new FormContainer( "javax.swing.JTabbedPane", new FormLayoutManager( class javax.swing.JTabbedPane ) ) {
+					name: "SettingTbbedPane"
+					"preferredSize": new java.awt.Dimension( 400, 270 )
+					"foreground": new java.awt.Color( 255, 255, 255, 255 )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) {
+						"autoSize": false
+					} ) {
+						name: "ImgSettingPanel"
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "label1"
+							"text": "选择爬取的源（需要先写好Provider）："
+							"font": new java.awt.Font( "宋体", 1, 12 )
+							"foreground": new java.awt.Color( 255, 255, 255, 255 )
+						}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+							"x": 20
+							"y": 25
+							"width": 350
+							"height": 20
+						} )
+						add( new FormComponent( "javax.swing.JComboBox" ) {
+							name: "crawerSourceComBox"
+							"font": new java.awt.Font( "宋体", 0, 12 )
+							"foreground": new java.awt.Color( 102, 255, 255, 255 )
+						}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+							"x": 20
+							"y": 75
+							"height": 25
+							"width": 155
+						} )
+					}, new FormLayoutConstraints( null ) {
+						"title": "表情源设置"
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) {
+						"autoSize": false
+					} ) {
+						name: "HelpPanel"
+						add( new FormComponent( "javax.swing.JTextArea" ) {
+							name: "helpTextArea"
+							"text": "+ 搜索后如果结果较少可以尝试多搜索几次\n\n+ 搜索无结果可能是源服务器或者自己的网络问题\n\n+ 更换源需要简单的 JAVA 基础知识\n\n  如果没有请使用标注默认源项"
+							"margin": &Insets0 new java.awt.Insets( 25, 25, 0, 0 )
+							"foreground": &Color0 new java.awt.Color( 0, 204, 204, 255 )
+							"font": new java.awt.Font( "宋体", 1, 14 )
+						}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+							"x": 10
+							"y": 15
+							"height": 175
+							"width": 375
+						} )
+					}, new FormLayoutConstraints( null ) {
+						"title": "帮助"
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) {
+						"autoSize": false
+					} ) {
+						name: "AboutPanel"
+						add( new FormComponent( "javax.swing.JTextArea" ) {
+							name: "textArea"
+							"text": "作者：auuuu4\n\n欢迎反馈+Q3414608521\n\n该项目已 在GitHub 开源 ：\n\nhttps://github.com/auuuu4/EmojiSearch\n\nVersion 1.0.0-Bate"
+							"margin": #Insets0
+							"foreground": #Color0
+							"font": new java.awt.Font( "宋体", 1, 13 )
+						}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+							"x": 10
+							"y": 15
+							"height": 175
+							"width": 375
+						} )
+					}, new FormLayoutConstraints( null ) {
+						"title": "关于"
+					} )
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"y": 30
+					"width": 398
+					"height": 239
+					"x": 0
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+					name: "TitilePanel"
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+					"width": 398
+					"x": 0
+					"y": 0
+					"height": 30
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Center"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 400, 300 )
+		} )
+	}
+}
