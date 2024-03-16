@@ -49,12 +49,11 @@ src
 运行 `cn.m2on.EmojiSearchApp` 即可
 
 ###### 运行截图
+![a6fTVbWRR0](https://github.com/auuuu4/EmojiSearch/assets/97584318/6c7250ae-f3cc-4209-b588-6d26e1f5ab86)
 
-![a6fTVbWRR0](C:\Users\Administrator\Documents\ShareX\Screenshots\2024-03\a6fTVbWRR0.png)
+![gog5j47RUT](https://github.com/auuuu4/EmojiSearch/assets/97584318/37f68a30-592f-432c-aebe-a3da65248e26)
 
-![gog5j47RUT](C:\Users\Administrator\Documents\ShareX\Screenshots\2024-03\gog5j47RUT.png)
-
-![lHMeoSsPGZ](C:\Users\Administrator\Documents\ShareX\Screenshots\2024-03\lHMeoSsPGZ.png)
+![lHMeoSsPGZ](https://github.com/auuuu4/EmojiSearch/assets/97584318/a0906e82-6a76-44c4-bb05-c6eaba9aba12)
 
 ## 开发
 
