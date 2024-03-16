@@ -12,6 +12,8 @@ import cn.m2on.util.ui.RadiusButtonBuilder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
 
@@ -69,7 +71,10 @@ public class Setting extends JFrame {
             g2d.dispose();
         }
     }
-
+    private void setIco(Image image){
+        // 设置标题栏的图标为face.gif
+        this.setIconImage(image);
+    }
     public void manualInitComponents(){
         MainPanel.setBackground(DEEP_BLACK_COLOR);
         TitilePanel.setBackground(DEEP_BLACK_COLOR);
@@ -79,7 +84,12 @@ public class Setting extends JFrame {
         textArea.setBackground(TEXT_BK_COLOR);
         helpTextArea.setBackground(TEXT_BK_COLOR);
         SettingTbbedPane.setUI(new SettingTabbedPaneUI());
-
+// 设置程序图标
+        try {
+            setIco(ImageIO.read(getClass().getResourceAsStream("/img/tray.png")));
+        }catch (IOException e){
+            System.out.println("设置Setting图标失败");
+        }
         // 导入本地源按钮
         JButton importLocalBt = RadiusButtonBuilder.createRadiusButton("\u5bfc\u5165\u672c\u5730\u56fe\u7247", EXIT_BUTTON_COLOR,15);
         importLocalBt.setFont(new Font("\u5b8b\u4f53", Font.BOLD, 12));

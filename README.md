@@ -48,7 +48,13 @@ src
 
 运行 `cn.m2on.EmojiSearchApp` 即可
 
+###### 运行截图
 
+![a6fTVbWRR0](C:\Users\Administrator\Documents\ShareX\Screenshots\2024-03\a6fTVbWRR0.png)
+
+![gog5j47RUT](C:\Users\Administrator\Documents\ShareX\Screenshots\2024-03\gog5j47RUT.png)
+
+![lHMeoSsPGZ](C:\Users\Administrator\Documents\ShareX\Screenshots\2024-03\lHMeoSsPGZ.png)
 
 ## 开发
 

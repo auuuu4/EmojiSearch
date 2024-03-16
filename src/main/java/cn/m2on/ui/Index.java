@@ -22,10 +22,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
@@ -258,6 +255,17 @@ public class Index extends JFrame {
     Thread imageUpdateThread;
 
     /**
+    * @author: auuuu4
+    * @date: 2024/3/16
+    * @param image :
+    * @return : void
+    * @description: 设置应用图标
+    */
+    private void setIco(Image image){
+        // 设置标题栏的图标为face.gif
+        this.setIconImage(image);
+    }
+    /**
      * @return : void
      * @author: auuuu4
      * @date: 2024/3/13
@@ -265,7 +273,12 @@ public class Index extends JFrame {
      */
     private void manualInitComponents(){
 
-
+        // 设置程序图标
+        try {
+            setIco(ImageIO.read(getClass().getResourceAsStream("/img/tray.png")));
+        }catch (IOException e){
+            System.out.println("设置Index图标失败");
+        }
         // 设置各部分背景色
         MainPanel.setBackground(DEEP_BLACK_COLOR);
         searchTextField.setBackground(DEEP_BLACK_COLOR);
@@ -308,9 +321,8 @@ public class Index extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    TrayIcon trayIcon = new TrayIcon(ImageIO.read(new File("F:\\JavaDemo\\EmojiSearch\\src\\main\\resources\\img\\tray.png")));
+                    TrayIcon trayIcon = new TrayIcon(ImageIO.read(getClass().getResourceAsStream("/img/tray.png")));
                     SystemTray systemTray = SystemTray.getSystemTray();
-
 
                     trayIcon.setImageAutoSize(true);
                     trayIcon.setToolTip("点击显示表情包搜索工具");
@@ -451,7 +463,7 @@ public class Index extends JFrame {
             MainPanel.setBackground(UIManager.getColor("Button.background"));
             MainPanel.setLayout(null);
 
-            //======== ImagePanel ========
+            //======== ImageScrollPanel ========
             {
 
                 //======== ImagePanel ========
