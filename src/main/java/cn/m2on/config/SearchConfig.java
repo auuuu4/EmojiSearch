@@ -5,7 +5,7 @@ package cn.m2on.config;
  *
  * @Author: m2on
  * @Date: 2024/03/09/15:33
- * @Description:
+ * @Description: 搜索配置
  */
 public class SearchConfig {
     /**

@@ -18,7 +18,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Created with IntelliJ IDEA.
  * @Author: m2on
  * @Date: 2024/03/14/9:39
- * @Description:
+ * @Description: 搜索数据
  */
 public class SearchData {
     /**
@@ -66,6 +66,10 @@ public class SearchData {
         params.put("return","json");
         params.put("num",100);
         crawlerSourcesArray.add(new CrawlerURLSource("随机图片源","https://img.moehu.org/pic.php",Method.GET,"keyword",params));
+
+
+        params = new HashMap<>();
+        crawlerSourcesArray.add(new CrawlerURLSource("本地（未完成）","xxxxx",Method.GET,"keyword",params));
 
         // AlApi
 //        params.put("token","xxxxxx");
