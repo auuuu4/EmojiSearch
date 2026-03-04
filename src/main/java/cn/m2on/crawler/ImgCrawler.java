@@ -36,6 +36,7 @@ public class ImgCrawler implements SourceCrawler{
 //            e.printStackTrace();
             System.out.println("线程"+Thread.currentThread().getName()+"获取图片资源失败");
         }finally {
+            ImageThreadPoolExecutor.onWorkerFinished();
             System.out.println("线程"+Thread.currentThread().getName()+"释放了");
         }
     }
