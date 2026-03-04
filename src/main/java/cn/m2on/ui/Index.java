@@ -7,8 +7,7 @@ package cn.m2on.ui;
 import cn.m2on.config.SearchConfig;
 import cn.m2on.crawler.ImageThreadPoolExecutor;
 import cn.m2on.crawler.SourceProvider;
-import cn.m2on.crawler.provider.AlapiProvider;
-import cn.m2on.crawler.provider.RandomProvider;
+import cn.m2on.data.FavoriteStore;
 import cn.m2on.data.SearchData;
 import cn.m2on.entity.ImageSource;
 import cn.m2on.util.ui.RadiusButtonBuilder;
@@ -16,16 +15,11 @@ import cn.m2on.util.ui.UiUtil;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
 
 
 public class Index extends JFrame {
@@ -44,6 +38,7 @@ public class Index extends JFrame {
     private boolean isDragging;
 
     private String searchContent;
+    private int insertedImageCount = 0;
 
 
     public Index() {
@@ -75,12 +70,12 @@ public class Index extends JFrame {
     * @description: 插入解析后的表情列表
     */
     public void insertImages(){
-        while(SearchData.isImageSourceEmpty()){
+        while(!SearchData.isImageSourceEmpty()){
             try {
                 ImageSource source = SearchData.takeImageSource();
                 System.out.println("准备插入"+source.getImgUrl());
                 try {
-                    insertImg(source.getImage());
+                    insertImg(source);
                 }catch (NullPointerException e){
                     System.out.println("插入"+source.getImgUrl()+"失败");
                 }
@@ -98,7 +93,9 @@ public class Index extends JFrame {
     * @return : void
     * @description: 增添表情到表情框
     */
-    private void insertImg(Image image){
+    private void insertImg(ImageSource source){
+        Image image = source.getImage();
+        String imgUrl = source.getImgUrl();
         JButton newBt = new JButton(new ImageIcon(image));
         newBt.setPreferredSize(new Dimension(155,155));
         newBt.setMargin(new Insets(0,0,0,0));
@@ -110,7 +107,18 @@ public class Index extends JFrame {
         newBt.setOpaque(false);
         newBt.setContentAreaFilled(false);
         newBt.setBorderPainted(false);
+        newBt.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                newBt.setBorderPainted(true);
+                newBt.setBorder(BorderFactory.createLineBorder(new Color(0x66ffff), 2, true));
+            }
 
+            @Override
+            public void mouseExited(MouseEvent e) {
+                newBt.setBorderPainted(false);
+            }
+        });
 
         // 监听点击事件，将图片剪切到剪切版
         newBt.addActionListener(new ActionListener() {
@@ -127,7 +135,58 @@ public class Index extends JFrame {
                 }
             }
         });
+
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem favItem = new JMenuItem(FavoriteStore.contains(imgUrl) ? "取消收藏" : "收藏图片");
+        favItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (FavoriteStore.contains(imgUrl)) {
+                    FavoriteStore.remove(imgUrl);
+                    favItem.setText("收藏图片");
+                    JOptionPane.showMessageDialog(indexWin, "已取消收藏", "提示", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    FavoriteStore.add(imgUrl);
+                    favItem.setText("取消收藏");
+                    JOptionPane.showMessageDialog(indexWin, "已收藏，可在“收藏源”中查看", "提示", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+        popupMenu.add(favItem);
+
+        JMenuItem saveItem = new JMenuItem("另存为...");
+        saveItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Icon icon = newBt.getIcon();
+                    if (!(icon instanceof ImageIcon)) {
+                        return;
+                    }
+                    BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D g2 = bi.createGraphics();
+                    icon.paintIcon(newBt, g2, 0, 0);
+                    g2.dispose();
+
+                    JFileChooser chooser = new JFileChooser();
+                    chooser.setSelectedFile(new File("emoji_" + System.currentTimeMillis() + ".png"));
+                    int rst = chooser.showSaveDialog(indexWin);
+                    if (rst == JFileChooser.APPROVE_OPTION) {
+                        File target = chooser.getSelectedFile();
+                        ImageIO.write(bi, "png", target);
+                        JOptionPane.showMessageDialog(indexWin, "已保存到: " + target.getAbsolutePath(), "提示", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(indexWin, "保存失败: " + ex.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        popupMenu.add(saveItem);
+        newBt.setComponentPopupMenu(popupMenu);
+
         ImagePanel.add(newBt);
+        insertedImageCount++;
+        statusLabel.setText("已加载 " + insertedImageCount + " 张");
     }
 
     /**
@@ -161,9 +220,6 @@ public class Index extends JFrame {
      * test
      */
     public void test(){
-        RandomProvider crawler = new RandomProvider();
-//        crawler.provideSource();
-        CountDownLatch latch = new CountDownLatch(20);
         ImageThreadPoolExecutor.consume();
         ImageThreadPoolExecutor.await();
         insertImages();
@@ -284,6 +340,21 @@ public class Index extends JFrame {
         searchTextField.setBackground(DEEP_BLACK_COLOR);
         ImageScrollPanel.setBackground(DEEP_BLACK_COLOR);
         ImagePanel.setBackground(IMG_PANEL_BLACK_COLOR);
+        statusLabel.setForeground(Color.WHITE);
+        statusLabel.setText("就绪");
+        loadingBar.setVisible(false);
+        recentKeywordBox.setBackground(DEEP_BLACK_COLOR);
+        recentKeywordBox.setForeground(Color.WHITE);
+        refreshRecentKeywordBox();
+        recentKeywordBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Object selected = recentKeywordBox.getSelectedItem();
+                if (selected != null) {
+                    searchTextField.setText(String.valueOf(selected));
+                }
+            }
+        });
 
         // 设置背景透明
         ImageScrollPanel.setOpaque(false);
@@ -390,8 +461,10 @@ public class Index extends JFrame {
                     ImageSource source = SearchData.takeImageSource();
                     System.out.println("准备插入"+source.getImgUrl());
                     try {
-                        insertImg(source.getImage());
-                        indexWin.pack();
+                        SwingUtilities.invokeLater(() -> {
+                            insertImg(source);
+                            indexWin.pack();
+                        });
                         System.out.println("已插入"+source.getImgUrl());
                     }catch (NullPointerException ne){
                         System.out.println("插入"+source.getImgUrl()+"失败");
@@ -410,23 +483,93 @@ public class Index extends JFrame {
         searchTextField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                SearchData.clearUrlQueue();
-                ImageThreadPoolExecutor.reset();
-                ImageThreadPoolExecutor.execute(new Thread(()->{
-                    searchContent = searchTextField.getText();
-                    System.out.println("改变输入："+searchContent);
-                    ImagePanel.removeAll();
-                    // 开始搜索表情
-                    SourceProvider provider = SearchData.getCrawler(SearchConfig.getCurrentSourceIndex());
-                    boolean rst = provider.provideSource(searchContent);
-                    if(rst){
-//                        JOptionPane.showMessageDialog(indexWin, "搜索完成", "提示",JOptionPane.INFORMATION_MESSAGE);
-                    }else{
-                        JOptionPane.showMessageDialog(indexWin, "该表情源搜索出错，请更换其他源", "错误",JOptionPane.ERROR_MESSAGE);
-                    }
-                    ImageThreadPoolExecutor.consume();
-                }));
+                triggerSearch();
             }
+        });
+
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                triggerSearch();
+            }
+        });
+    }
+
+
+
+    private void triggerSearch(){
+        SearchData.clearUrlQueue();
+        SearchData.clearImageQueue();
+        ImageThreadPoolExecutor.reset();
+        insertedImageCount = 0;
+        setLoading(true);
+        ImageThreadPoolExecutor.execute(new Thread(() -> {
+            searchContent = searchTextField.getText();
+            SourceProvider provider = SearchData.getCrawler(SearchConfig.getCurrentSourceIndex());
+            String sourceId = SearchData.getSourceIdByIndex(SearchConfig.getCurrentSourceIndex());
+            boolean requireKeyword = !SearchData.FAVORITES_SOURCE_ID.equals(sourceId);
+            if (requireKeyword && (searchContent == null || searchContent.trim().isEmpty())) {
+                SwingUtilities.invokeLater(() -> {
+                    JOptionPane.showMessageDialog(indexWin, "请输入关键词", "提示", JOptionPane.INFORMATION_MESSAGE);
+                    setLoading(false);
+                });
+                return;
+            }
+            if (searchContent != null && !searchContent.trim().isEmpty()) {
+                SearchConfig.addRecentKeyword(searchContent);
+                refreshRecentKeywordBox();
+            }
+            System.out.println("改变输入：" + searchContent);
+            SwingUtilities.invokeLater(() -> ImagePanel.removeAll());
+            boolean rst = provider.provideSource(searchContent);
+            if(!rst){
+                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(indexWin, "该表情源搜索出错，请更换其他源", "错误", JOptionPane.ERROR_MESSAGE));
+                setLoading(false);
+                return;
+            }
+            ImageThreadPoolExecutor.consume();
+            monitorSearchFinished();
+        }));
+    }
+
+    private void monitorSearchFinished() {
+        new Thread(() -> {
+            while (!ImageThreadPoolExecutor.isIdle() || !SearchData.isURLSourceEmpty()) {
+                try {
+                    Thread.sleep(150);
+                } catch (InterruptedException ignored) {
+                }
+            }
+            setLoading(false);
+        }).start();
+    }
+
+    private void setLoading(boolean loading){
+        SwingUtilities.invokeLater(() -> {
+            loadingBar.setVisible(loading);
+            loadingBar.setIndeterminate(loading);
+            if (loading) {
+                statusLabel.setText("正在搜索并加载图片...");
+            } else if (insertedImageCount == 0) {
+                statusLabel.setText("未加载到图片，可尝试更换源或关键词");
+            } else {
+                statusLabel.setText("加载完成，共 " + insertedImageCount + " 张");
+            }
+            searchTextField.setEnabled(!loading);
+            searchButton.setEnabled(!loading);
+            recentKeywordBox.setEnabled(!loading);
+        });
+    }
+
+
+
+    private void refreshRecentKeywordBox() {
+        SwingUtilities.invokeLater(() -> {
+            DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+            for (String keyword : SearchConfig.getRecentKeywords()) {
+                model.addElement(keyword);
+            }
+            recentKeywordBox.setModel(model);
         });
     }
 
@@ -450,6 +593,11 @@ public class Index extends JFrame {
         ImagePanel = new JPanel();
         tipLabel = new JLabel();
         searchTextField = new JTextField();
+        searchButton = new JButton();
+        statusLabel = new JLabel();
+        loadingBar = new JProgressBar();
+        recentKeywordBox = new JComboBox();
+        recentLabel = new JLabel();
 
         //======== this ========
         setBackground(UIManager.getColor("Button.background"));
@@ -490,7 +638,35 @@ public class Index extends JFrame {
             searchTextField.setCaretColor(new Color(0x99ffff));
             searchTextField.setSelectionColor(Color.white);
             MainPanel.add(searchTextField);
-            searchTextField.setBounds(220, 20, 205, 30);
+            searchTextField.setBounds(220, 20, 150, 30);
+
+            //---- searchButton ----
+            searchButton.setText("搜索");
+            searchButton.setForeground(Color.white);
+            searchButton.setBackground(new Color(65, 68, 70));
+            MainPanel.add(searchButton);
+            searchButton.setBounds(380, 20, 60, 30);
+
+            //---- statusLabel ----
+            statusLabel.setText("就绪");
+            statusLabel.setForeground(Color.white);
+            MainPanel.add(statusLabel);
+            statusLabel.setBounds(10, 340, 220, 15);
+
+            //---- loadingBar ----
+            loadingBar.setStringPainted(false);
+            MainPanel.add(loadingBar);
+            loadingBar.setBounds(240, 340, 270, 15);
+
+            //---- recentLabel ----
+            recentLabel.setText("最近搜索:");
+            recentLabel.setForeground(Color.white);
+            MainPanel.add(recentLabel);
+            recentLabel.setBounds(10, 48, 60, 15);
+
+            //---- recentKeywordBox ----
+            MainPanel.add(recentKeywordBox);
+            recentKeywordBox.setBounds(70, 43, 140, 22);
         }
         contentPane.add(MainPanel, BorderLayout.CENTER);
         pack();
@@ -504,6 +680,11 @@ public class Index extends JFrame {
     private JPanel ImagePanel;
     private JLabel tipLabel;
     private JTextField searchTextField;
+    private JButton searchButton;
+    private JLabel statusLabel;
+    private JProgressBar loadingBar;
+    private JComboBox recentKeywordBox;
+    private JLabel recentLabel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 
 }

@@ -7,6 +7,7 @@ package cn.m2on.ui;
 import cn.m2on.config.SearchConfig;
 import cn.m2on.crawler.ImageThreadPoolExecutor;
 import cn.m2on.data.SearchData;
+import cn.m2on.entity.CustomApiSource;
 import cn.m2on.util.ui.RadiusButtonBuilder;
 
 import java.awt.*;
@@ -83,6 +84,16 @@ public class Setting extends JFrame {
         HelpPanel.setBackground(DEEP_BLACK_COLOR);
         textArea.setBackground(TEXT_BK_COLOR);
         helpTextArea.setBackground(TEXT_BK_COLOR);
+        customNameField.setBackground(TEXT_BK_COLOR);
+        customUrlField.setBackground(TEXT_BK_COLOR);
+        customKeywordField.setBackground(TEXT_BK_COLOR);
+        customListField.setBackground(TEXT_BK_COLOR);
+        customImageField.setBackground(TEXT_BK_COLOR);
+        customNameField.setForeground(Color.WHITE);
+        customUrlField.setForeground(Color.WHITE);
+        customKeywordField.setForeground(Color.WHITE);
+        customListField.setForeground(Color.WHITE);
+        customImageField.setForeground(Color.WHITE);
         SettingTbbedPane.setUI(new SettingTabbedPaneUI());
 // 设置程序图标
         try {
@@ -119,6 +130,104 @@ public class Setting extends JFrame {
         });
         ImgSettingPanel.add(importLocalBt);
 
+        // 自定义 API 表单
+        customNameField.setBounds(20, 170, 165, 24);
+        customNameField.setText("自定义源名称");
+        ImgSettingPanel.add(customNameField);
+
+        customUrlField.setBounds(20, 198, 365, 24);
+        customUrlField.setText("https://example.com/api");
+        ImgSettingPanel.add(customUrlField);
+
+        customKeywordField.setBounds(190, 170, 95, 24);
+        customKeywordField.setText("keyword");
+        ImgSettingPanel.add(customKeywordField);
+
+        customListField.setBounds(290, 170, 45, 24);
+        customListField.setText("items");
+        ImgSettingPanel.add(customListField);
+
+        customImageField.setBounds(340, 170, 45, 24);
+        customImageField.setText("url");
+        ImgSettingPanel.add(customImageField);
+
+        JButton addCustomApiBt = RadiusButtonBuilder.createRadiusButton("添加API源", EXIT_BUTTON_COLOR, 15);
+        addCustomApiBt.setFont(new Font("宋体", Font.BOLD, 12));
+        addCustomApiBt.setBounds(265, 190, 120, 30);
+        registerButtonTouch(addCustomApiBt);
+        addCustomApiBt.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String name = customNameField.getText().trim();
+                String url = customUrlField.getText().trim();
+                String keyword = customKeywordField.getText().trim();
+                String listField = customListField.getText().trim();
+                String imageField = customImageField.getText().trim();
+                if (name.isEmpty() || url.isEmpty() || keyword.isEmpty() || listField.isEmpty() || imageField.isEmpty()) {
+                    JOptionPane.showMessageDialog(settingWin, "请完整填写自定义 API 源参数", "提示", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                CustomApiSource custom = new CustomApiSource(null, name, url, keyword, listField, imageField);
+                try {
+                    SearchData.addCustomApiSource(custom);
+                    refreshSourceViews();
+                    JOptionPane.showMessageDialog(settingWin, "已新增 API 源: " + name, "提示", JOptionPane.INFORMATION_MESSAGE);
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(settingWin, ex.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        ImgSettingPanel.add(addCustomApiBt);
+
+        JButton testApiBt = RadiusButtonBuilder.createRadiusButton("测试API", EXIT_BUTTON_COLOR, 15);
+        testApiBt.setFont(new Font("宋体", Font.BOLD, 12));
+        testApiBt.setBounds(265, 226, 120, 30);
+        registerButtonTouch(testApiBt);
+        testApiBt.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selected = crawerSourceComBox.getSelectedIndex();
+                if (selected < 0) {
+                    return;
+                }
+                boolean ok = SearchData.getCrawler(selected).provideSource("测试");
+                JOptionPane.showMessageDialog(settingWin, ok ? "测试成功，可正常返回数据" : "测试失败，请检查 API 参数", ok ? "提示" : "警告", ok ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
+                SearchData.clearUrlQueue();
+            }
+        });
+        ImgSettingPanel.add(testApiBt);
+
+        JButton deleteCustomApiBt = RadiusButtonBuilder.createRadiusButton("删除选中自定义源", EXIT_BUTTON_COLOR, 15);
+        deleteCustomApiBt.setFont(new Font("宋体", Font.BOLD, 12));
+        deleteCustomApiBt.setBounds(265, 154, 120, 30);
+        registerButtonTouch(deleteCustomApiBt);
+        deleteCustomApiBt.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Object selected = customSourceList.getSelectedValue();
+                if (selected == null) {
+                    JOptionPane.showMessageDialog(settingWin, "请先在列表中选择一个自定义源", "提示", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                String value = String.valueOf(selected);
+                int idx = value.indexOf("|");
+                if (idx <= 0) {
+                    return;
+                }
+                String sourceId = value.substring(0, idx).trim();
+                boolean removed = SearchData.removeCustomApiSourceById(sourceId);
+                if (removed) {
+                    refreshSourceViews();
+                    if (SearchConfig.getCurrentSourceIndex() >= SearchData.getCrawlerNum()) {
+                        SearchConfig.setCurrentSourceIndex(0);
+                    }
+                    JOptionPane.showMessageDialog(settingWin, "已删除自定义源", "提示", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+        ImgSettingPanel.add(deleteCustomApiBt);
+
+        refreshSourceViews();
 
         // 关闭按钮
         JButton closeBt = RadiusButtonBuilder.createRadiusButton("X",EXIT_BUTTON_COLOR,30);
@@ -132,10 +241,6 @@ public class Setting extends JFrame {
         });
         TitilePanel.add(closeBt);
 
-        // 初始化爬虫列表
-        for(int i = 0, j = SearchData.getCrawlerNum(); i<j;i++){
-            crawerSourceComBox.addItem(SearchData.getCrawlerSource(i).getSourceName());
-        }
         // 更换爬虫
         crawerSourceComBox.addItemListener(new ItemListener() {
             @Override
@@ -150,6 +255,25 @@ public class Setting extends JFrame {
         });
 
     }
+
+
+    private void refreshSourceViews() {
+        DefaultComboBoxModel<String> sourceModel = new DefaultComboBoxModel<>();
+        for (int i = 0; i < SearchData.getCrawlerNum(); i++) {
+            sourceModel.addElement(SearchData.getCrawlerSource(i).getSourceName());
+        }
+        crawerSourceComBox.setModel(sourceModel);
+        if (SearchConfig.getCurrentSourceIndex() >= 0 && SearchConfig.getCurrentSourceIndex() < sourceModel.getSize()) {
+            crawerSourceComBox.setSelectedIndex(SearchConfig.getCurrentSourceIndex());
+        }
+
+        DefaultListModel<String> customModel = new DefaultListModel<>();
+        for (CustomApiSource source : SearchData.getCustomApiSourcesSnapshot()) {
+            customModel.addElement(source.getSourceId() + " | " + source.getSourceName());
+        }
+        customSourceList.setModel(customModel);
+    }
+
 
 
     /**
@@ -199,6 +323,13 @@ public class Setting extends JFrame {
         ImgSettingPanel = new JPanel();
         label1 = new JLabel();
         crawerSourceComBox = new JComboBox();
+        customNameField = new JTextField();
+        customUrlField = new JTextField();
+        customKeywordField = new JTextField();
+        customListField = new JTextField();
+        customImageField = new JTextField();
+        customSourceScrollPane = new JScrollPane();
+        customSourceList = new JList();
         HelpPanel = new JPanel();
         helpTextArea = new JTextArea();
         AboutPanel = new JPanel();
@@ -236,6 +367,13 @@ public class Setting extends JFrame {
                     crawerSourceComBox.setForeground(new Color(0x66ffff));
                     ImgSettingPanel.add(crawerSourceComBox);
                     crawerSourceComBox.setBounds(20, 75, 155, 25);
+
+                    //======== customSourceScrollPane ========
+                    {
+                        customSourceScrollPane.setViewportView(customSourceList);
+                    }
+                    ImgSettingPanel.add(customSourceScrollPane);
+                    customSourceScrollPane.setBounds(20, 130, 235, 125);
                 }
                 SettingTbbedPane.addTab("\u8868\u60c5\u6e90\u8bbe\u7f6e", ImgSettingPanel);
 
@@ -319,6 +457,13 @@ public class Setting extends JFrame {
     private JPanel ImgSettingPanel;
     private JLabel label1;
     private JComboBox crawerSourceComBox;
+    private JTextField customNameField;
+    private JTextField customUrlField;
+    private JTextField customKeywordField;
+    private JTextField customListField;
+    private JTextField customImageField;
+    private JScrollPane customSourceScrollPane;
+    private JList customSourceList;
     private JPanel HelpPanel;
     private JTextArea helpTextArea;
     private JPanel AboutPanel;
